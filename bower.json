@@ -1,0 +1,24 @@
+{
+  "name": "konashi-web-bluetooth",
+  "description": "konashi for Web Bluetooth",
+  "main": ["js/konashi.js"],
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "fabfile.py"
+  ],
+  "keywords": ["konashi", "bluetooth", "ble"],
+  "authors": ["YUKAI engineering Inc."],
+  "homepage": "https://github.com/YUKAI/konashi-web-bluetooth",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YUKAI/konashi-web-bluetooth.git"
+  }
+}
