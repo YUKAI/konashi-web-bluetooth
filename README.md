@@ -8,7 +8,7 @@ https://github.com/toyoshim/konashi-js-sdk/tree/web_bluetooth は konashi.js を
 
 1. Android 6 に [Chrome Dev](https://play.google.com/store/apps/details?id=com.chrome.dev&hl=en) をインストール。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. https://jsfiddle.net/kiryuxxu/kpok7sw4/ でサンプルを試す
+3. http://yukai.github.io/konashi-web-bluetooth/example.html
 
 
 ## 開発ツール
