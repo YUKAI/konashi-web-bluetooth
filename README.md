@@ -4,6 +4,23 @@ konashi を Web Bluetooth で動かす試み。
 https://github.com/toyoshim/konashi-js-sdk/tree/web_bluetooth は konashi.js をそのまま動かす想定で実装されているが、このリポジトリでは Web Bluetooth を Promise で操作するもっと薄いラッパーを実装することを目指す。
 
 
+```javascript
+window.addEventListener('click', () => {
+  Konashi.find(true).then(k => {
+    k.pinMode(k.PIO1, k.OUTPUT)
+      .then(() => {
+        var i = 0;
+        setInterval(() => {
+          k.digitalWrite(k.PIO1, i % 2 == 0 ? k.HIGH : k.LOW);
+          i++;
+        }, 500);
+      });
+  });
+});
+
+```
+
+
 ## 導入
 
 1. Android 6 に [Chrome Dev](https://play.google.com/store/apps/details?id=com.chrome.dev&hl=en) をインストール。
