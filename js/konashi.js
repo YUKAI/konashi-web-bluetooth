@@ -406,7 +406,7 @@ class Konashi {
   pwmWrite(pin, ratio) {
     ratio = Math.min(100, Math.max(0, ratio));
     var duty = consts.KONASHI_PWM_LED_PERIOD * ratio / 100;
-    return this.pwmDuty(pin, ratio);
+    return this.pwmDuty(pin, duty);
   }
 
   // PWM }
