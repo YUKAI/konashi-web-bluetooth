@@ -11,7 +11,6 @@ $(() => {
 
   $('#start').on('click', () => {
     Konashi.find(true).then((k) => {
-      // TODO: LED3 and LED4 are not working.
       k.pwmMode(k.LED2, k.KONASHI_PWM_ENABLE_LED_MODE)
         .then(() => k.pwmMode(k.LED3, k.KONASHI_PWM_ENABLE_LED_MODE))
         .then(() => {
