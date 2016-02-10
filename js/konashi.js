@@ -179,6 +179,9 @@ class Konashi {
     }
     // TODO
     this._pioOutputStore = 0;
+
+    // TODO
+    this._pwmSettingStore = 0;
   }
 
   /**
@@ -248,13 +251,6 @@ class Konashi {
 
   // { Digital I/O
 
-  pinModes() {
-    return this._characteristic.pioSetting.readValue().then(
-      (v) => {
-        var bufview = new Uint8Array(v);
-      });
-  }
-
   /**
    * Set konashi's pin mode
    *
@@ -267,7 +263,7 @@ class Konashi {
     return new Promise((resolve, reject) => {
       that._characteristic.pioSetting.readValue()
         .then((v) => {
-          var data = (new Uint8Array(v))[0];
+          var data = new Uint8Array(v)[0];
           if (flag == consts.OUTPUT) {
             data |= 0x01 << pin;
           } else {
@@ -279,7 +275,29 @@ class Konashi {
     });
   }
 
-  pinPullup(pin, mode) {}
+  /**
+   * Set pullup mode
+   *
+   * @param {Number} Konashi.PIO[0-7]
+   * @param {Number} Konashi.(PULLUP|NO_PULLS)
+   * @returns {Promise<Void>}
+   */
+  pinPullup(pin, mode) {
+      var that = this;
+      return new Promise((resolve, reject) => {
+        that._characteristic.pioPullUp.readValue()
+          .then(v => {
+            var data = new Uint8Array(v)[0];
+            if (mode == consts.PULLUP) {
+              data |= 0x01 << pin;
+            } else {
+              data &= ~(0x01 << pin);
+            }
+            this._characteristic.pioPullUp.writeValue(new Uint8Array([data]))
+              .then(resolve, reject);
+          });
+      });
+  }
 
   /**
    * Read a value of digital pin
@@ -295,8 +313,16 @@ class Konashi {
       });
   }
 
-// https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/dispatcher/PioStoreUpdater.java
-// https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/store/PioStore.java#L19 
+  /**
+   * Write value to a digital pin
+   *
+   * https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/dispatcher/PioStoreUpdater.java
+   * https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/store/PioStore.java#L19 
+   *
+   * @param {Number} Konashi.PIO[0-7]
+   * @param {Number} Konashi.(LOW|HIGH)
+   * @returns {Promise<Void>} 
+   */
   digitalWrite(pin, value) {
     if (value == consts.HIGH) {
       this._pioOutputStore |= 0x01 << pin;
@@ -308,20 +334,80 @@ class Konashi {
 
   // Digital I/O }
 
-  // { Analog I/O
+  // { Analog Input
 
-  analogReference() {}
-  analogRead(pin) {}
-  analogWrite(pin, value) {}
+  /**
+   * Read an analog pin
+   *
+   * @param {Number} Konashi.PIO[0-7]
+   * @returns {Promise<Number>}
+   */
+  analogRead(pin) {
+    var c;
+    switch (pin) {
+      case consts.AIO0:
+        c = this._characteristic.analogRead0;
+        break;
+      case consts.AIO1:
+        c = this._characteristic.analogRead1;
+        break;
+      case consts.AIO2:
+        c = this._characteristic.analogRead2;
+        break;
+    }
+    return this._characteristic.pioInputNotification.readValue()
+      .then((buf) => {
+        return new Uint8Array(buf)[0];
+      });
+  }
 
-  // Analog I/O }
+  // Analog Input }
 
   // { PWM
 
-  pwmMode(pin, mode) {}
-  pwmPeriod(pin, period) {}
-  pwmDuty(pin, duty) {}
-  pwmLedDrive(pin, dutyRatio) {}
+  pwmMode(pin, mode) {
+    console.log('pwmMode: ' + pin + ' ' + mode);
+    if (mode == consts.KONASHI_PWM_ENABLE || mode == consts.KONASHI_PWM_ENABLE_LED_MODE) {
+      this._pwmSettingStore |= 0x01 << pin;
+    } else {
+      this._pwmSettingStore &= ~(0x01 << pin) & 0xff;
+    }
+    var that = this,
+        data = new Uint8Array([this._pwmSettingStore]);
+    if (mode == consts.KONASHI_PWM_ENABLE_LED_MODE) {
+        return this.pwmPeriod(pin, consts.KONASHI_PWM_LED_PERIOD)
+          .then(() => that.pwmDuty(pin, 0))
+          .then(() => that._characteristic.pwmConfig.writeValue(data));
+    }
+    return this._characteristic.pwmConfig.writeValue(data);
+  }
+
+  pwmPeriod(pin, period) {
+    var data = new Uint8Array([pin,
+                               (period >> 24) & 0xff,
+                               (period >> 16) & 0xff,
+                               (period >> 8) & 0xff,
+                               (period >> 0) & 0xff]);
+    return this._characteristic.pwmParameter.writeValue(data);
+
+  }
+
+  pwmDuty(pin, duty) {
+    duty = parseInt(duty);
+    var data = new Uint8Array([pin,
+                               (duty >> 24) & 0xff,
+                               (duty >> 16) & 0xff,
+                               (duty >> 8) & 0xff,
+                               (duty >> 0) & 0xff]);
+    console.log('pwmDuty: ' + pin + ' ' + duty);
+    return this._characteristic.pwmDuty.writeValue(data);
+  }
+
+  pwmWrite(pin, ratio) {
+    ratio = Math.min(100, Math.max(0, ratio));
+    var duty = consts.KONASHI_PWM_LED_PERIOD * ratio / 100;
+    return this.pwmDuty(pin, ratio);
+  }
 
   // PWM }
 
@@ -355,7 +441,29 @@ class Konashi {
   // { Hardware Control
 
   reset() {}
-  batteryLevelRead() {}
+
+  /**
+   * Read battery level
+   *
+   * @returns {Promise<Number>}
+   */
+  batteryLevelRead() {
+    return new Promise((resolve, reject) => {
+      this._gatt.getPrimaryService('battery_service')
+        .then(service => {
+          return service.getCharacteristic('battery_level');
+        })
+        .then(v => {
+          resolve(new Uint8Array(v)[0]);
+        });
+    });
+  }
+
+  /**
+   * Read deivce's RSSI
+   *
+   * @returns {Number} RSSI
+   */
   signalStrengthRead() {}
 
   // Hardware Control }
