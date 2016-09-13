@@ -308,8 +308,7 @@ class Konashi {
   digitalRead(pin) {
     return this._characteristic.pioInputNotification.readValue()
       .then((buf) => {
-        var bufview = new Uint8Array(buf);
-        return bufview[0];
+        return buf.getUint8(0);
       });
   }
 
@@ -357,7 +356,7 @@ class Konashi {
     }
     return this._characteristic.pioInputNotification.readValue()
       .then((buf) => {
-        return new Uint8Array(buf)[0];
+        return buf.getUint8(0);
       });
   }
 
