@@ -21,6 +21,13 @@ window.addEventListener('click', () => {
 ```
 
 
+## 動作環境
+
+- Mac El Capitan + Chromium 55.x
+- Android 6 + Chrome Dev 54.x
+- konashi firmware: 2.x
+
+
 ## 導入
 
 ### Mac
