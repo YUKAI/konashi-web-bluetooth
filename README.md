@@ -23,9 +23,18 @@ window.addEventListener('click', () => {
 
 ## 導入
 
+### Mac
+
+1. https://download-chromium.appspot.com/ から Chromium をダウンロードする。
+2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
+3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
+
+
+### Android
+
 1. Android 6 に [Chrome Dev](https://play.google.com/store/apps/details?id=com.chrome.dev&hl=en) をインストール。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. https://yukai.github.io/konashi-web-bluetooth/examples/pio.html を開く
+3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
 
 
 ## 開発ツール
@@ -36,10 +45,8 @@ window.addEventListener('click', () => {
 
 ## メモ
 
-- Android の Chrome Dev が一番実装が進んでいる。 参考: [Implementation Status](https://github.com/WebBluetoothCG/web-bluetooth/blob/gh-pages/implementation-status.md)
-- notify がまだ使えないので値がちゃんと取れない。
-- Android 上では Bluetooth の他に位置情報も ON にしないといけない。
-- Mac Chrome ではペアリング可能だが characteristic がちゃんと取れない?
+- 実装状況: [Implementation Status](https://github.com/WebBluetoothCG/web-bluetooth/blob/gh-pages/implementation-status.md)
+- Android では Bluetooth の他に位置情報も ON にしないといけない。
 
 
 ## 参考

@@ -132,17 +132,17 @@ class Konashi {
    * Find konasih2 device
    *
    * @param {Boolean} [autoConnect]
-   * @param {Object} [filter] defaul: `{namePrefix: 'konashi2'}`
+   * @param {Object} [options] defaul: `{filters: [{namePrefix: 'konashi2'}], optionalServices: ['229bff00-03fb-40da-98a7-b0def65c2d4b']}`
    * @returns {Promise<Konashi>}
    */
-  static find(autoConnect, filter) {
+  static find(autoConnect, options) {
     if (typeof autoConnect == undefined) {
       autoConnect = true;
     }
-    filter = filter || {namePrefix: 'konashi2'};
+    options = options || {filters: [{namePrefix: 'konashi2'}], optionalServices: [Konashi._serviceUUID]};
     return new Promise((resolve, reject) => {
       navigator.bluetooth
-        .requestDevice({filters: [filter]})
+        .requestDevice(options)
         .then(
           (d) => {
             var konashi = new Konashi(d);
@@ -195,7 +195,7 @@ class Konashi {
   connect() {
     var that = this;
     return new Promise((resolve, reject) => {
-      that._device.connectGATT()
+      that._device.gatt.connect()
         .then(
           (gatt) => {
             that._gatt = gatt;
