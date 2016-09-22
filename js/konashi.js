@@ -454,28 +454,29 @@ class Konashi {
    * @returns {Promise<Void>}
    */
   uartMode(mode) {
-    if (mode == Konashi.KONASHI_UART_DISABLE
-        || mode == Konashi.KONASHI_UART_ENABLE) {
+    if (mode != Konashi.KONASHI_UART_DISABLE
+        && mode != Konashi.KONASHI_UART_ENABLE) {
       return Promise.reject(new Error('Invalid UART mode.'));
     }
+    console.log(this);
     return this._c12c.uartConfig.writeValue(new Uint8Array([mode]));
   }
 
   /**
-   * Set the baudarate of UART
+   * Set the bauda rate of UART
    *
-   * @param {Number} baudrate Konashi.KONASHI_UART_RATE_(2K4|9K6)
+   * @param {Number} rate Konashi.KONASHI_UART_RATE_(2K4|9K6)
    * @returns {Promise<Void>}
    */
-  uartBaudrate(baudrate) {
+  uartBaudRate(rate) {
     var that = this;
-    if (baudrate != Konashi.KONASHI_UART_RATE_2K4
-        && baudrate != Konashi.KONASHI_UART_RATE_9K6) {
-      return Promise.reject(new Error('Invalid UART baudrate.'));
+    if (rate != Konashi.KONASHI_UART_RATE_2K4
+        && rate != Konashi.KONASHI_UART_RATE_9K6) {
+      return Promise.reject(new Error('Invalid UART baud rate.'));
     }
-    var data = new Uint8Array([(baudrate >> 8) & 0xff,
-                               baudrate & 0xff]);
-    return this._c12c.uartBaudrate.writeValue(data);
+    var data = new Uint8Array([(rate >> 8) & 0xff,
+                               rate & 0xff]);
+    return this._c12c.uartBaudRate.writeValue(data);
   }
 
   /**
@@ -485,7 +486,7 @@ class Konashi {
    * @returns {Promise<Void>}
    */
   uartWrite(data) {
-    var chunkSize = Konashi.KONASHI_DATA_MAX_LENGTH;
+    var chunkSize = Konashi.KONASHI_UART_DATA_MAX_LENGTH;
     if (data.length <= chunkSize) {
       return this._uartWrite(data);
     }
@@ -507,8 +508,8 @@ class Konashi {
   }
 
   _uartWrite(data) {
-    if (Konashi.KONASHI_DATA_MAX_LENGTH < data.length) {
-      return Promise.reject(new Error('The data size has to be less then ' + Konashi.KONASHI_DATA_MAX_LENGTH + '.'));
+    if (Konashi.KONASHI_UART_DATA_MAX_LENGTH < data.length) {
+      return Promise.reject(new Error('The data size has to be less then ' + Konashi.KONASHI_UART_DATA_MAX_LENGTH + '.'));
     }
     var writeData = new Uint8Array(data.length + 1);
     writeData[0] = data.length;
