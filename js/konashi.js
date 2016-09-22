@@ -623,10 +623,17 @@ class Konashi {
   // { Hardware Control
 
   /**
+   * Disconnect
+   */
+  disconnect() {
+    return this._gatt.disconnect();
+  }
+
+  /**
    * Reset hardware
    */
   reset() {
-      return this._c12c.hardwareReset.writeValue(new Uint8Array([1]));
+    return this._c12c.hardwareReset.writeValue(new Uint8Array([1]));
   }
 
   /**
