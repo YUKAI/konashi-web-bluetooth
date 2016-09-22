@@ -178,9 +178,10 @@ var drawer = function(ctrl) {
       })
     ),
     m('ul', [
-      m('li', [m('a', {href: 'http://konashi.ux-xu.com', target: '_blank'}, 'Official Site')]),
+      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-web-bluetooth', target: '_blank'}, 'Github')]),
       m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-ios-sdk', target: '_blank'}, 'iOS SDK')]),
-      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-android-sdk', target: '_blank'}, 'Android SDK')])
+      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-android-sdk', target: '_blank'}, 'Android SDK')]),
+      m('li', [m('a', {href: 'http://konashi.ux-xu.com', target: '_blank'}, 'Official Site')])
     ])
   ]);
 };
