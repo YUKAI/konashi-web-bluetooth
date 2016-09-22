@@ -81,14 +81,25 @@ const consts = {
   KOSHIAN_SPI_BIT_ORDER_MSB_FIRST: 1
 };
 
+
 class Konashi {
+  /**
+   * Create konashi UUID
+   *
+   * @param {String} part 4 characters hex
+   * @returns {String}
+   */
+  static _createUUID(part) {
+    return '229b' + part + '-03fb-40da-98a7-b0def65c2d4b';
+  }
+
   /**
    * Returns konashi's service UUID
    *
    * @returns {String}
    */
   static get _serviceUUID() {
-    return '229bff00-03fb-40da-98a7-b0def65c2d4b';
+    return Konashi._createUUID('ff00');
   }
 
   /**
@@ -96,35 +107,32 @@ class Konashi {
    *
    * @returns {Object<String, String>} key: label, value: UUID
    */
-  static get _characteristicUUIDs() {
+  static get _c12cUUIDs() {
     return {
-      analogInput:   '229b3008-03fb-40da-98a7-b0def65c2d4b',
-      pioSetting:    '229b3000-03fb-40da-98a7-b0def65c2d4b',
-      pioOutput:     '229b3002-03fb-40da-98a7-b0def65c2d4b',
-      pioPullUp:     '229b3001-03fb-40da-98a7-b0def65c2d4b',
-      pioInputNotification:
-                     '229b3003-03fb-40da-98a7-b0def65c2d4b',
-      pwmConfig:     '229b3004-03fb-40da-98a7-b0def65c2d4b',
-      pwmParameter:  '229b3005-03fb-40da-98a7-b0def65c2d4b',
-      pwmDuty:       '229b3006-03fb-40da-98a7-b0def65c2d4b',
-      analogDrive:   '229b3007-03fb-40da-98a7-b0def65c2d4b',
-      analogRead0:   '229b3008-03fb-40da-98a7-b0def65c2d4b',
-      analogRead1:   '229b3009-03fb-40da-98a7-b0def65c2d4b',
-      analogRead2:   '229b300a-03fb-40da-98a7-b0def65c2d4b',
-      i2cConfig:     '229b300b-03fb-40da-98a7-b0def65c2d4b',
-      i2cStartStop:  '229b300c-03fb-40da-98a7-b0def65c2d4b',
-      i2cWrite:      '229b300d-03fb-40da-98a7-b0def65c2d4b',
-      i2cReadParameter:
-                     '229b300e-03fb-40da-98a7-b0def65c2d4b',
-      i2cRead:       '229b300f-03fb-40da-98a7-b0def65c2d4b',
-      uartConfig:    '229b3010-03fb-40da-98a7-b0def65c2d4b',
-      uartBaudRate:  '229b3011-03fb-40da-98a7-b0def65c2d4b',
-      uartTx:        '229b3012-03fb-40da-98a7-b0def65c2d4b',
-      uartRxNotification:
-                     '229b3013-03fb-40da-98a7-b0def65c2d4b',
-      hardwareReset: '229b3014-03fb-40da-98a7-b0def65c2d4b',
+      analogInput:          Konashi._createUUID('3008'),
+      pioSetting:           Konashi._createUUID('3000'),
+      pioOutput:            Konashi._createUUID('3002'),
+      pioPullUp:            Konashi._createUUID('3001'),
+      pioInputNotification: Konashi._createUUID('3003'),
+      pwmConfig:            Konashi._createUUID('3004'),
+      pwmParameter:         Konashi._createUUID('3005'),
+      pwmDuty:              Konashi._createUUID('3006'),
+      analogDrive:          Konashi._createUUID('3007'),
+      analogRead0:          Konashi._createUUID('3008'),
+      analogRead1:          Konashi._createUUID('3009'),
+      analogRead2:          Konashi._createUUID('300a'),
+      i2cConfig:            Konashi._createUUID('300b'),
+      i2cStartStop:         Konashi._createUUID('300c'),
+      i2cWrite:             Konashi._createUUID('300d'),
+      i2cReadParameter:     Konashi._createUUID('300e'),
+      i2cRead:              Konashi._createUUID('300f'),
+      uartConfig:           Konashi._createUUID('3010'),
+      uartBaudRate:         Konashi._createUUID('3011'),
+      uartTx:               Konashi._createUUID('3012'),
+      uartRxNotification:   Konashi._createUUID('3013'),
+      hardwareReset:        Konashi._createUUID('3014'),
       hardwareLowBatteryNotification:
-                     '229b3015-03fb-40da-98a7-b0def65c2d4b'
+                            Konashi._createUUID('3015'),
     };
   }
 
@@ -162,7 +170,7 @@ class Konashi {
   /**
    * constructor
    *
-   * @param {BluetoothDevice}
+   * @param {BluetoothDevice} device
    */
   constructor(device) {
     /** BluetoothDevice */
@@ -172,16 +180,14 @@ class Konashi {
     /** BluetoothGATTService */
     this._service = null;
     /** Object<String, BluetoothGATTCharacteristic> */
-    this._characteristic = {};
+    this._c12c = {};
+    /** Object<String, Number> */
+    this._state = {pioOutputs: 0,
+                   pwmModes: 0};
 
     for (let key in consts) {
         this[key] = consts[key];
     }
-    // TODO
-    this._pioOutputStore = 0;
-
-    // TODO
-    this._pwmSettingStore = 0;
   }
 
   /**
@@ -207,16 +213,16 @@ class Konashi {
           (service) => {
             that._service = service;
             var promises = [], keys = [];
-            for (let key in Konashi._characteristicUUIDs) {
+            for (let key in Konashi._c12cUUIDs) {
               keys.push(key);
             }
             keys.forEach((label, i) => {
               promises.push(
-                that._service.getCharacteristic(Konashi._characteristicUUIDs[label]).then(
+                that._service.getCharacteristic(Konashi._c12cUUIDs[label]).then(
                   (c) => {
                     // TODO: Watch changes of all characteristics
                     // https://github.com/WebBluetoothCG/web-bluetooth/issues/176
-                    that._characteristic[label] = c;
+                    that._c12c[label] = c;
                     Promise.resolve();
                   }
                 )
@@ -233,15 +239,18 @@ class Konashi {
     });
   }  
 
+  // TODO
   isConnected() {
   }
 
   /**
    * Returns peripheral name
    *
-   * @returns {Promise<String>}
+   * @returns {String}
    */
-  peripheralName() {}
+  name() {
+    return this._device.name;
+  }
 
   delay(ms) {
     return new Promise((resolve, reject) => {
@@ -254,22 +263,22 @@ class Konashi {
   /**
    * Set konashi's pin mode
    *
-   * @param {Number} Konashi.PIO[0-7]
-   * @param {Number} Konashi.(INPUT|OUTPUT)
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} flag Konashi.(INPUT|OUTPUT)
    * @returns {Promise<void>}
    */
   pinMode(pin, flag) {
     var that = this;
     return new Promise((resolve, reject) => {
-      that._characteristic.pioSetting.readValue()
+      that._c12c.pioSetting.readValue()
         .then((v) => {
           var data = new Uint8Array(v)[0];
-          if (flag == consts.OUTPUT) {
+          if (flag == Konashi.OUTPUT) {
             data |= 0x01 << pin;
           } else {
             data &= ~(0x01 << pin);
           }
-          this._characteristic.pioSetting.writeValue(new Uint8Array([data]))
+          this._c12c.pioSetting.writeValue(new Uint8Array([data]))
             .then(resolve, reject);
         });
     });
@@ -278,22 +287,22 @@ class Konashi {
   /**
    * Set pullup mode
    *
-   * @param {Number} Konashi.PIO[0-7]
-   * @param {Number} Konashi.(PULLUP|NO_PULLS)
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} mode Konashi.(PULLUP|NO_PULLS)
    * @returns {Promise<Void>}
    */
   pinPullup(pin, mode) {
       var that = this;
       return new Promise((resolve, reject) => {
-        that._characteristic.pioPullUp.readValue()
+        that._c12c.pioPullUp.readValue()
           .then(v => {
             var data = new Uint8Array(v)[0];
-            if (mode == consts.PULLUP) {
+            if (mode == Konashi.PULLUP) {
               data |= 0x01 << pin;
             } else {
               data &= ~(0x01 << pin);
             }
-            this._characteristic.pioPullUp.writeValue(new Uint8Array([data]))
+            this._c12c.pioPullUp.writeValue(new Uint8Array([data]))
               .then(resolve, reject);
           });
       });
@@ -302,11 +311,11 @@ class Konashi {
   /**
    * Read a value of digital pin
    *
-   * @param {Number} Konashi.PIO[0-7]
+   * @param {Number} pin Konashi.PIO[0-7]
    * @returns {Promise<Number>} Konashi.(LOW|HIGH)
    */
   digitalRead(pin) {
-    return this._characteristic.pioInputNotification.readValue()
+    return this._c12c.pioInputNotification.readValue()
       .then((buf) => {
         return buf.getUint8(0);
       });
@@ -318,17 +327,18 @@ class Konashi {
    * https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/dispatcher/PioStoreUpdater.java
    * https://github.com/YUKAI/konashi-android-sdk/blob/master/konashi-android-sdk/src/main/java/com/uxxu/konashi/lib/store/PioStore.java#L19 
    *
-   * @param {Number} Konashi.PIO[0-7]
-   * @param {Number} Konashi.(LOW|HIGH)
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} value Konashi.(LOW|HIGH)
    * @returns {Promise<Void>} 
    */
   digitalWrite(pin, value) {
-    if (value == consts.HIGH) {
-      this._pioOutputStore |= 0x01 << pin;
+    var data;
+    if (value == Konashi.HIGH) {
+      this._state.pioOutputs |= 0x01 << pin;
     } else {
-      this._pioOutputStore &= ~(0x01 << pin) & 0xFF;
+      this._state.pioOutputs &= ~(0x01 << pin) & 0xFF;
     }
-    return this._characteristic.pioOutput.writeValue(new Uint8Array([this._pioOutputStore]));
+    return this._c12c.pioOutput.writeValue(new Uint8Array([this._state.pioOutputs]));
   }
 
   // Digital I/O }
@@ -338,59 +348,77 @@ class Konashi {
   /**
    * Read an analog pin
    *
-   * @param {Number} Konashi.PIO[0-7]
+   * @param {Number} pin Konashi.PIO[0-7]
    * @returns {Promise<Number>}
    */
   analogRead(pin) {
     var c;
     switch (pin) {
-      case consts.AIO0:
-        c = this._characteristic.analogRead0;
+      case Konashi.AIO0:
+        c = this._c12c.analogRead0;
         break;
-      case consts.AIO1:
-        c = this._characteristic.analogRead1;
+      case Konashi.AIO1:
+        c = this._c12c.analogRead1;
         break;
-      case consts.AIO2:
-        c = this._characteristic.analogRead2;
+      case Konashi.AIO2:
+        c = this._c12c.analogRead2;
         break;
     }
-    return this._characteristic.pioInputNotification.readValue()
-      .then((buf) => {
-        return buf.getUint8(0);
-      });
+    return c.readValue().then((buf) => {
+      return buf.getUint8(0) << 8 | buf.getUint8(1);
+    });
   }
 
   // Analog Input }
 
   // { PWM
 
+  /**
+   * Set PWM mode
+   *
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} mode Konashi.(KONASHI_PWM_ENABL|KONASHI_PWM_ENABLE_LED_MODE)
+   */
   pwmMode(pin, mode) {
     console.log('pwmMode: ' + pin + ' ' + mode);
-    if (mode == consts.KONASHI_PWM_ENABLE || mode == consts.KONASHI_PWM_ENABLE_LED_MODE) {
-      this._pwmSettingStore |= 0x01 << pin;
+    if (mode == Konashi.KONASHI_PWM_ENABLE || mode == Konashi.KONASHI_PWM_ENABLE_LED_MODE) {
+      this._state.pwmModes |= 0x01 << pin;
     } else {
-      this._pwmSettingStore &= ~(0x01 << pin) & 0xff;
+      this._state.pwmModes &= ~(0x01 << pin) & 0xff;
     }
     var that = this,
-        data = new Uint8Array([this._pwmSettingStore]);
-    if (mode == consts.KONASHI_PWM_ENABLE_LED_MODE) {
-        return this.pwmPeriod(pin, consts.KONASHI_PWM_LED_PERIOD)
+        data = new Uint8Array([this._state.pwmModes]);
+    if (mode == Konashi.KONASHI_PWM_ENABLE_LED_MODE) {
+        return this.pwmPeriod(pin, Konashi.KONASHI_PWM_LED_PERIOD)
           .then(() => that.pwmDuty(pin, 0))
-          .then(() => that._characteristic.pwmConfig.writeValue(data));
+          .then(() => that._c12c.pwmConfig.writeValue(data));
     }
-    return this._characteristic.pwmConfig.writeValue(data);
+    return this._c12c.pwmConfig.writeValue(data);
   }
 
+  /**
+   * Set the PWM cycle
+   *
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} period
+   * @returns {Promise<Void>}
+   */
   pwmPeriod(pin, period) {
     var data = new Uint8Array([pin,
                                (period >> 24) & 0xff,
                                (period >> 16) & 0xff,
                                (period >> 8) & 0xff,
                                (period >> 0) & 0xff]);
-    return this._characteristic.pwmParameter.writeValue(data);
-
+    return this._c12c.pwmParameter.writeValue(data);
   }
 
+  /**
+   * Set the duty cycle
+   *
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} duty Please specify the units as microseconds (us) in 32bits.
+   * @returns {Promise<Void>}
+   */
   pwmDuty(pin, duty) {
     duty = parseInt(duty);
     var data = new Uint8Array([pin,
@@ -399,12 +427,19 @@ class Konashi {
                                (duty >> 8) & 0xff,
                                (duty >> 0) & 0xff]);
     console.log('pwmDuty: ' + pin + ' ' + duty);
-    return this._characteristic.pwmDuty.writeValue(data);
+    return this._c12c.pwmDuty.writeValue(data);
   }
 
+  /**
+   * Write PWM ratio
+   *
+   * @param {Number} pin Konashi.PIO[0-7]
+   * @param {Number} ratio (0-100)
+   * @returns {Promise<Void>}
+   */
   pwmWrite(pin, ratio) {
     ratio = Math.min(100, Math.max(0, ratio));
-    var duty = consts.KONASHI_PWM_LED_PERIOD * ratio / 100;
+    var duty = Konashi.KONASHI_PWM_LED_PERIOD * ratio / 100;
     return this.pwmDuty(pin, duty);
   }
 
@@ -412,25 +447,173 @@ class Konashi {
 
   // { UART
 
-  uartMode(mode) {}
-  uartBaudrate(baudrate) {}
-  uartWrite(data) {}
+  /**
+   * Set UART mode
+   *
+   * @param {Number} mode Konashi.KONASHI_UART_(DISABLE|ENABLE)
+   * @returns {Promise<Void>}
+   */
+  uartMode(mode) {
+    if (mode != Konashi.KONASHI_UART_DISABLE
+        && mode != Konashi.KONASHI_UART_ENABLE) {
+      return Promise.reject(new Error('Invalid UART mode.'));
+    }
+    console.log(this);
+    return this._c12c.uartConfig.writeValue(new Uint8Array([mode]));
+  }
+
+  /**
+   * Set the bauda rate of UART
+   *
+   * @param {Number} rate Konashi.KONASHI_UART_RATE_(2K4|9K6)
+   * @returns {Promise<Void>}
+   */
+  uartBaudRate(rate) {
+    var that = this;
+    if (rate != Konashi.KONASHI_UART_RATE_2K4
+        && rate != Konashi.KONASHI_UART_RATE_9K6) {
+      return Promise.reject(new Error('Invalid UART baud rate.'));
+    }
+    var data = new Uint8Array([(rate >> 8) & 0xff,
+                               rate & 0xff]);
+    return this._c12c.uartBaudRate.writeValue(data);
+  }
+
+  /**
+   * Write UART data
+   *
+   * @param {Uint8Array} data
+   * @returns {Promise<Void>}
+   */
+  uartWrite(data) {
+    var chunkSize = Konashi.KONASHI_UART_DATA_MAX_LENGTH;
+    if (data.length <= chunkSize) {
+      return this._uartWrite(data);
+    }
+    var chunks = [];
+    for (let i = 0; i < data.length; i += chunkSize) {
+      chunks.push(data.slice(i, i + chunkSize));
+    }
+    return this._uartWriteChunks(chunks, 0);
+  }
+
+  _uartWriteChunks(chunks, index) {
+    if (chunks.length <= index) {
+      return Promise.resolve();
+    }
+    var that = this;
+    return this._uartWrite(chunks[index]).then(() => {
+      return that._uartWriteChunks(chunks, index + 1);
+    });
+  }
+
+  _uartWrite(data) {
+    if (Konashi.KONASHI_UART_DATA_MAX_LENGTH < data.length) {
+      return Promise.reject(new Error('The data size has to be less then ' + Konashi.KONASHI_UART_DATA_MAX_LENGTH + '.'));
+    }
+    var writeData = new Uint8Array(data.length + 1);
+    writeData[0] = data.length;
+    data.forEach((v, i) => {
+      writeData[i + 1] = v;
+    });
+    return this._c12c.uartTx.writeValue(writeData);
+  }
 
   // UART }
 
   // { I2C
 
-  i2cMode(mode) {}
-  i2cStartCondition() {}
-  i2cRestartCondition() {}
-  i2cStopCondition() {}
-  i2cWrite(address, data) {}
-  i2cRead(address, length) {}
+  /**
+   * Set I2C mode
+   *
+   * @param {Number} mode Konashi.KONASHI_I2C_(DISABLE|ENABLE|ENABLE_100K|ENABLE_400K)
+   * @returns {Promise<Void>}
+   */
+  i2cMode(mode) {
+    if (mode != Konashi.KONASHI_I2C_DISABLE
+        && mode != Konashi.KONASHI_I2C_ENABLE
+        && mode != Konashi.KONASHI_I2C_ENABLE_100K
+        && mode != Konashi.KONASHI_I2C_ENABLE_400K) {
+      return Promise.reject(new Error('Invalid I2C mode'));
+    }
+    return this._c12c.i2cConfig.writeValue(new Uint8Array([mode]));
+  }
+
+  i2cStopCondition() {
+    return this._i2cSendCondition(Konashi.KONASHI_I2C_STOP_CONDITION);
+  }
+
+  i2cStartCondition() {
+    return this._i2cSendCondition(Konashi.KONASHI_I2C_STOP_CONDITION);
+  }
+
+  i2cRestartCondition() {
+    return this._i2cSendCondition(Konashi.KONASHI_I2C_RESTART_CONDITION);
+  }
+
+  /**
+   * @param {Number} condition Konashi.KONASHI_I2C_(STOP|START|RESTART)_CONDITION
+   * @returns {Promise<Void>}
+   */
+  _i2cSendCondition(condition) {
+    if (condition != Konashi.KONASHI_I2C_STOP_CONDITION
+        && condition != Konashi.KONASHI_I2C_START_CONDITION
+        && condition != Konashi.KONASHI_I2C_RESTART_CONDITION) {
+      return Promise.reject(new Error('Invalid I2C condition.'));
+    }
+    return this._c12c.i2cStartStop.writeValue(new Uint8Array([condition]));
+  }
+
+  /**
+   * Write I2C data
+   *
+   * @param {Number} address
+   * @param {Uint8Array}
+   * @returns {Promise<Void>}
+   */
+  i2cWrite(address, data) {
+    var chunkSize = Konashi.KONASHI_I2C_DATA_MAX_LENGTH;
+    if (data.length <= chunkSize) {
+      return this._i2cWrite(data);
+    }
+    var chunks = [];
+    for (let i = 0; i < data.length; i += chunkSize) {
+      chunks.push(data.slice(i, i + chunkSize));
+    }
+    return this._i2cWriteChunks(address, chunks, 0);
+  }
+
+  _i2cWriteChunks(address, chunks, index) {
+    if (chunks.length <= index) {
+      return Promise.resolve();
+    }
+    var that = this;
+    return this._i2cWrite(chunks[index]).then(() => {
+      return that._i2cWriteChunks(chunks, index + 1);
+    });
+  }
+
+  _i2cWrite(address, data) {
+    if (Konashi.KONASHI_I2C_DATA_MAX_LENGTH < data.length) {
+      return Promise.reject(new Error('The data size has to be less than ' + Konashi.KONASHI_I2C_DATA_MAX_LENGTH + '.'));
+    }
+    var writeData = new Uint8Array(Konashi.KONASHI_I2C_DATA_MAX_LENGTH + 2);
+    writeData[0] = data.length + 1;
+    writeData[1] = (address << 1) & 0b11111110;
+    data.forEach((v, i) => {
+      writeData[i + 2] = v;
+    });
+    return this._c12c.i2cWrite.writeValue(writeData);
+  }
+
+  i2cRead(address, length) {
+  }
   
   // I2C }
 
   // { SPI
 
+  // TODO
   spiMode(mode, speed, bitOrder) {}
   spiWrite(data) {}
   spiRead() {}
@@ -439,7 +622,19 @@ class Konashi {
 
   // { Hardware Control
 
-  reset() {}
+  /**
+   * Disconnect
+   */
+  disconnect() {
+    return this._gatt.disconnect();
+  }
+
+  /**
+   * Reset hardware
+   */
+  reset() {
+    return this._c12c.hardwareReset.writeValue(new Uint8Array([1]));
+  }
 
   /**
    * Read battery level
@@ -459,79 +654,13 @@ class Konashi {
   }
 
   /**
-   * Read deivce's RSSI
+   * TODO: Read deivce's RSSI
    *
    * @returns {Number} RSSI
    */
   signalStrengthRead() {}
 
   // Hardware Control }
-}
-
-class IOState {
-
-    static get pioModes() {
-    }
-
-    static get pioPullups() {
-    }
-
-    static get pioInputs() {
-    }
-
-    static get pioOutputs() {
-    }
-
-    static get pwmModes() {
-    }
-
-    static get pwmPeriods() {
-    }
-
-    static get pwmDuties() {
-    }
-
-    static get aio0() {
-    }
-
-    static get aio1() {
-    }
-
-    static get aio2() {
-    }
-
-    static get uartMode() {
-    }
-
-    static get uartBaudrate() {
-    }
-
-    static get uartData() {
-    }
-
-    static get i2cMode() {
-    }
-
-    static get i2cAddress() {
-    }
-
-    static get i2cData() {
-    }
-
-    static get i2cDataLength() {
-    }
-
-    static get spiMode() {
-    }
-
-    static get spiEndianness() {
-    }
-
-    static get spiSpeed() {
-    }
-
-    static get spiData() {
-    }
 }
 
 for (let key in consts) {

@@ -1,0 +1,41 @@
+.konashi-content {
+  max-width: 1000px;
+  padding: 3rem 2rem;
+  margin: 0 auto;
+}
+
+.konashi-content .mdl-cell {
+  padding: 0.8rem 1rem;
+}
+
+.konashi-content table {
+  max-width: 500px;
+  min-width: 200px;
+  margin: 0 auto;
+}
+
+.konashi-content .mdl-data-table thead th {
+  text-align: center;
+}
+
+.konashi-content .mdl-data-table .mdl-button {
+  min-width: 7rem;
+}
+
+
+@media (max-width: 479px) {
+
+  .konashi-content {
+    padding: 0;
+  }
+
+  .konashi-content .mdl-data-table {
+    width: 100%;
+  }
+
+  .konashi-content .mdl-data-table th,
+  .konashi-content .mdl-data-table td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
