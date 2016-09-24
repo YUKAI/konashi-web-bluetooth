@@ -272,11 +272,11 @@ class Konashi {
     return new Promise((resolve, reject) => {
       that._c12c.pioSetting.readValue()
         .then((v) => {
-          var data = new Uint8Array(v)[0];
+          var data = v.getUint8();
           if (flag == Konashi.OUTPUT) {
             data |= 0x01 << pin;
           } else {
-            data &= ~(0x01 << pin);
+            data &= ~(0x01 << pin) & 0xff;
           }
           this._c12c.pioSetting.writeValue(new Uint8Array([data]))
             .then(resolve, reject);
@@ -296,7 +296,7 @@ class Konashi {
       return new Promise((resolve, reject) => {
         that._c12c.pioPullUp.readValue()
           .then(v => {
-            var data = new Uint8Array(v)[0];
+            var data = v.getUint8();
             if (mode == Konashi.PULLUP) {
               data |= 0x01 << pin;
             } else {
@@ -336,7 +336,7 @@ class Konashi {
     if (value == Konashi.HIGH) {
       this._state.pioOutputs |= 0x01 << pin;
     } else {
-      this._state.pioOutputs &= ~(0x01 << pin) & 0xFF;
+      this._state.pioOutputs &= ~(0x01 << pin) & 0xff;
     }
     return this._c12c.pioOutput.writeValue(new Uint8Array([this._state.pioOutputs]));
   }
@@ -458,7 +458,6 @@ class Konashi {
         && mode != Konashi.KONASHI_UART_ENABLE) {
       return Promise.reject(new Error('Invalid UART mode.'));
     }
-    console.log(this);
     return this._c12c.uartConfig.writeValue(new Uint8Array([mode]));
   }
 

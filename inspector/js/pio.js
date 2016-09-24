@@ -40,7 +40,6 @@ app.c.Pio = {
         chain = pin.setMode(Konashi.INPUT);
       } else {
         chain = chain.then(() => {
-          console.log(pin.number());
           return pin.setMode(Konashi.INPUT);
         });
       }
