@@ -317,7 +317,7 @@ class Konashi {
   digitalRead(pin) {
     return this._c12c.pioInputNotification.readValue()
       .then((buf) => {
-        return buf.getUint8(0);
+        return (buf.getUint8(0) >> pin) & 0x01;
       });
   }
 

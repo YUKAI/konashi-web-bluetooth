@@ -18,8 +18,8 @@ app.c.Pio = {
           return m('tr', [
             m('td', pin.number()),
             m('td', [m('button.mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect', {onclick: ctrl.onClickInput.bind(ctrl, pin)}, pin.modeLabel())]),
-            m('td', [m('button.mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect', {onclick: ctrl.onClickState.bind(ctrl, pin)}, pin.stateLabel())]),
-            m('td', pin.stateLabel()),
+            m('td', [m('button.mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect', {onclick: ctrl.onClickOutput.bind(ctrl, pin)}, pin.outputLabel())]),
+            m('td', pin.inputLabel()),
             m('td', [
               m('label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect', {'for': 'pio' + pin.number()}, [
                 m('input.mdl-checkbox__input', {type: 'checkbox', id: 'pio' + pin.number(), checked: pin.pullup() === Konashi.PULLUP})
@@ -33,6 +33,18 @@ app.c.Pio = {
 
   controller: function(args) {
     var vm = args.vm;
+
+    setInterval(() => {
+      var chain = null;
+      app.vm.pioPins().forEach(pin => {
+        if (chain == null) {
+          chain = pin.read().then(pin.input);
+        } else {
+          chain = chain.then(() => pin.read().then(pin.input));
+        }
+      });
+      m.redraw();
+    }, 100);
 
     var chain = null;
     app.vm.pioPins().forEach(pin => {
@@ -52,8 +64,8 @@ app.c.Pio = {
           m.redraw(true);
         });
       },
-      onClickState: function(pin) {
-        pin.toggleState().then(() => {
+      onClickOutput: function(pin) {
+        pin.toggleOutput().then(() => {
           m.redraw(true);
         });
       }
