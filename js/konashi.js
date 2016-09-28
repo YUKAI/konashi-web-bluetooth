@@ -272,7 +272,7 @@ class Konashi {
     return new Promise((resolve, reject) => {
       that._c12c.pioSetting.readValue()
         .then((v) => {
-          var data = v.getUint8();
+          var data = v.getUint8(0);
           if (flag == Konashi.OUTPUT) {
             data |= 0x01 << pin;
           } else {
@@ -296,7 +296,7 @@ class Konashi {
       return new Promise((resolve, reject) => {
         that._c12c.pioPullUp.readValue()
           .then(v => {
-            var data = v.getUint8();
+            var data = v.getUint8(0);
             if (mode == Konashi.PULLUP) {
               data |= 0x01 << pin;
             } else {
