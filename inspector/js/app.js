@@ -35,9 +35,9 @@ var PioPin = function(pin) {
   this.number = m.prop(pin);
   this.mode = m.prop(Konashi.INPUT);
   this.pullup = m.prop(Konashi.NO_PULLS);
-  this.state = m.prop(Konashi.LOW);
-  this.stateLabel = () => {
-    switch (this.state()) {
+  this.input = m.prop(Konashi.LOW);
+  this.inputLabel = () => {
+    switch (this.input()) {
       case Konashi.HIGH:
         return 'HIGH';
       case Konashi.LOW:
@@ -45,6 +45,33 @@ var PioPin = function(pin) {
       default:
         return 'UNKNOWN';
     }
+  };
+  this.output = m.prop(Konashi.LOW);
+  this.outputLabel = () => {
+    switch (this.output()) {
+      case Konashi.HIGH:
+        return 'HIGH';
+      case Konashi.LOW:
+        return 'LOW';
+      default:
+        return 'UNKNOWN';
+    }
+  };
+  this.toggleOutput = () => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    var output = this.output() === Konashi.HIGH ? Konashi.LOW : Konashi.HIGH;
+    return app.vm.konashi().device().digitalWrite(this.number(), output).then(() => {
+      this.output(output);
+      return output;
+    });
+  }
+  this.read = () => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    return app.vm.konashi().device().digitalRead(this.number());
   };
   this.modeLabel = () => {
     return this.mode() == Konashi.INPUT ? 'INPUT' : 'OUTPUT';
@@ -62,16 +89,6 @@ var PioPin = function(pin) {
     var mode = this.mode() == Konashi.INPUT ? Konashi.OUTPUT : Konashi.INPUT;
     return this.setMode(mode);
   };
-  this.toggleState = () => {
-    if (!app.vm.konashi().connected()) {
-        return;
-    }
-    var state = this.state() === Konashi.HIGH ? Konashi.LOW : Konashi.HIGH;
-    return app.vm.konashi().device().digitalWrite(this.number(), state).then(() => {
-      this.state(state);
-      return state;
-    });
-  }
 };
 
 app.Page = function(title, component) {
