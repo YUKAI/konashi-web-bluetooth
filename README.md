@@ -6,7 +6,7 @@ https://github.com/toyoshim/konashi-js-sdk/tree/web_bluetooth は konashi.js を
 
 ```javascript
 window.addEventListener('click', () => {
-  Konashi.find(true).then(k => {
+  Konashi.find(true /* autoconnect */).then(k => {
     k.pinMode(k.PIO1, k.OUTPUT)
       .then(() => {
         var i = 0;
@@ -34,14 +34,14 @@ window.addEventListener('click', () => {
 
 1. https://download-chromium.appspot.com/ から Chromium をダウンロードする。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
+3. https://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
 
 
 ### Android
 
 1. Android 6 に [Chrome Dev](https://play.google.com/store/apps/details?id=com.chrome.dev&hl=en) をインストール。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
+3. https://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
 
 
 ## 開発ツール
