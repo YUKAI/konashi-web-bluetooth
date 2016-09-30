@@ -22,6 +22,11 @@
   min-width: 7rem;
 }
 
+.konashi-content .analog-pin-indicator {
+  width: 150px;
+  margin: 0 auto;
+}
+
 
 @media (max-width: 479px) {
 

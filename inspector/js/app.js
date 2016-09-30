@@ -67,6 +67,20 @@ var PioPin = function(pin) {
       return output;
     });
   }
+  this.pwmDuty = m.prop(0);
+  this.setPwmMode = (mode) => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    return app.vm.konashi().device().pwmMode(this.number(), mode);
+  };
+  this.pwmLedDrive = (ratio) => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    return app.vm.konashi().device().pwmLedDrive(this.number(), ratio)
+      .then(() => this.pwmDuty(ratio));
+  };
   this.read = () => {
     if (!app.vm.konashi().connected()) {
         return;
@@ -91,6 +105,18 @@ var PioPin = function(pin) {
   };
 };
 
+var AnalogPin = function(pin) {
+  this.number = m.prop(pin);
+  this.input = m.prop(0);
+  this.read= () => {
+    if (!app.vm.konashi().connected()) {
+      return;
+    }
+    return app.vm.konashi().device().analogRead(this.number());
+  };
+};
+
+
 app.Page = function(title, component) {
   this.title = m.prop(title);
   this.component = m.prop(component);
@@ -109,6 +135,12 @@ app.vm = {
                              new PioPin(2),
                              new PioPin(3),
                              new PioPin(4)]);
+    app.vm.pwmPins = m.prop([app.vm.pioPins()[0],
+                             app.vm.pioPins()[1],
+                             app.vm.pioPins()[2]]);
+    app.vm.analogPins = m.prop([new AnalogPin(0),
+                                new AnalogPin(1),
+                                new AnalogPin(2)]);
 
     app.vm.messages = m.prop([]);
     app.vm.pushMessage = function(message) {
