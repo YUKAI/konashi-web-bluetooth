@@ -36,7 +36,7 @@ app.c.AnalogIn = {
             return;
           }
           pin.input(value);
-          var progress = value / 1300 * 100;
+          var progress = value / Konashi.KONASHI_ANALOG_REFERENCE * 100;
           elem.MaterialProgress.setProgress(progress);
         };
         if (chain == null) {
