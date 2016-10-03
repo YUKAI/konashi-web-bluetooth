@@ -5,10 +5,11 @@
 }
 
 .konashi-content .mdl-cell {
-  padding: 0.8rem 1rem;
+  padding: 0.3rem 1rem 0 ;
 }
 
-.konashi-content table {
+.konashi-content table,
+.konashi-content .panel {
   max-width: 500px;
   min-width: 200px;
   margin: 0 auto;
@@ -22,6 +23,15 @@
   min-width: 7rem;
 }
 
+.konashi-content .analog-pin-indicator {
+  width: 150px;
+  margin: 0 auto;
+}
+
+.konashi-content .mdl-textfield {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 @media (max-width: 479px) {
 

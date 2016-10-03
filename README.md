@@ -1,12 +1,12 @@
-# konashi for Web Bluetooth
+# konashi SDK for Web Bluetooth
+
+![](portrait.jpg)
 
 konashi を Web Bluetooth で動かす試み。
-https://github.com/toyoshim/konashi-js-sdk/tree/web_bluetooth は konashi.js をそのまま動かす想定で実装されているが、このリポジトリでは Web Bluetooth を Promise で操作するもっと薄いラッパーを実装することを目指す。
-
 
 ```javascript
 window.addEventListener('click', () => {
-  Konashi.find(true).then(k => {
+  Konashi.find(true /* autoconnect */).then(k => {
     k.pinMode(k.PIO1, k.OUTPUT)
       .then(() => {
         var i = 0;
@@ -19,6 +19,12 @@ window.addEventListener('click', () => {
 });
 
 ```
+
+## konashi inspector for Web Bluetooth
+
+konashi の機能を簡単に操作できるツール
+
+https://yukai.github.io/konashi-web-bluetooth/inspector/
 
 
 ## 動作環境
@@ -34,14 +40,14 @@ window.addEventListener('click', () => {
 
 1. https://download-chromium.appspot.com/ から Chromium をダウンロードする。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
+3. https://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
 
 
 ### Android
 
 1. Android 6 に [Chrome Dev](https://play.google.com/store/apps/details?id=com.chrome.dev&hl=en) をインストール。
 2. `chrome://flags/#enable-web-bluetooth` を開いて Web Bluetooth を有効にする。
-3. http://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
+3. https://yukai.github.io/konashi-web-bluetooth/examples/pio.html で L チカができる事を確認。
 
 
 ## 開発ツール
@@ -59,7 +65,10 @@ window.addEventListener('click', () => {
 ## 参考
 
 - [Web Bluetooth Draft Community Group Report](https://webbluetoothcg.github.io/web-bluetooth/)
+    - [日本語訳](https://tkybpp.github.io/web-bluetooth-jp/)
 - [Interact with BLE devices on the Web - Google Developers](https://developers.google.com/web/updates/2015/07/interact-with-ble-devices-on-the-web?hl=en)
 - [chrome.bluetoothLowEnergy - Google Chrome](https://developer.chrome.com/apps/bluetoothLowEnergy)
 - [Web Bluetoothを使ってkonashi2.0でLチカしてみる](http://qiita.com/toyoshim/items/74ae7551dc2c9ab9cbf6)
 - [konashi.js向けのコードをChromeで実行](http://qiita.com/toyoshim/items/05b1d14ca925d5df3e43)
+- https://github.com/toyoshim/konashi-js-sdk/tree/web_bluetooth
+

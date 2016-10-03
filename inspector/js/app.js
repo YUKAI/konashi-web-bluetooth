@@ -67,6 +67,20 @@ var PioPin = function(pin) {
       return output;
     });
   }
+  this.pwmDuty = m.prop(100);
+  this.setPwmMode = (mode) => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    return app.vm.konashi().device().pwmMode(this.number(), mode);
+  };
+  this.pwmLedDrive = (ratio) => {
+    if (!app.vm.konashi().connected()) {
+        return;
+    }
+    return app.vm.konashi().device().pwmLedDrive(this.number(), ratio)
+      .then(() => this.pwmDuty(ratio));
+  };
   this.read = () => {
     if (!app.vm.konashi().connected()) {
         return;
@@ -91,6 +105,18 @@ var PioPin = function(pin) {
   };
 };
 
+var AnalogPin = function(pin) {
+  this.number = m.prop(pin);
+  this.input = m.prop(0);
+  this.read= () => {
+    if (!app.vm.konashi().connected()) {
+      return;
+    }
+    return app.vm.konashi().device().analogRead(this.number());
+  };
+};
+
+
 app.Page = function(title, component) {
   this.title = m.prop(title);
   this.component = m.prop(component);
@@ -109,6 +135,12 @@ app.vm = {
                              new PioPin(2),
                              new PioPin(3),
                              new PioPin(4)]);
+    app.vm.pwmPins = m.prop([app.vm.pioPins()[0],
+                             app.vm.pioPins()[1],
+                             app.vm.pioPins()[2]]);
+    app.vm.analogPins = m.prop([new AnalogPin(0),
+                                new AnalogPin(1),
+                                new AnalogPin(2)]);
 
     app.vm.messages = m.prop([]);
     app.vm.pushMessage = function(message) {
@@ -185,32 +217,25 @@ var header = function(ctrl) {
 };
 
 var drawer = function(ctrl) {
+  var externals = [
+    ['Github', 'https://github.com/YUKAI/konashi-web-bluetooth'],
+    ['iOS SDK', 'https://github.com/YUKAI/konashi-ios-sdk'],
+    ['Android SDK', 'https://github.com/YUKAI/konashi-android-sdk'],
+    ['Official Site', 'http://konashi.ux-xu.com']];
+
   return m('.mdl-layout__drawer', [
     m('span.mdl-layout-title', 'konashi inspector'),
-    m('nav.mdl-navigation', 
-      app.pages.map(function(page) {
-        return m('a.mdl-navigation__link',
-                 {href: '#', onclick: ctrl.onClickDrawerItem.bind(ctrl, page)},
-                 page.title());
-      })
-    ),
-    m('ul', [
-      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-web-bluetooth', target: '_blank'}, 'Github')]),
-      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-ios-sdk', target: '_blank'}, 'iOS SDK')]),
-      m('li', [m('a', {href: 'https://github.com/YUKAI/konashi-android-sdk', target: '_blank'}, 'Android SDK')]),
-      m('li', [m('a', {href: 'http://konashi.ux-xu.com', target: '_blank'}, 'Official Site')])
-    ])
-  ]);
-};
-
-var footer = function(ctrl) {
-  return m('.mdl-grid.mdl-color--grey-100.mdl-color-text--grey-900', [
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: '', value: 'hoge'}, 'YUKAI/konashi-web-bluetooth')]),
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: 'dummy'}, 'iOS SDK')]),
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: 'dummy'}, 'Android SDK')]),
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: 'dummy'}, 'Official Site')]),
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: 'http://mithril.js.org', target: '_blank'}, 'Mithril')]),
-    m('.mdl-cell.mdl-cell--2-col', [m('a', {href: 'https://getmdl.io', target: '_blank'}, 'Material Design Lite')])
+    m('nav.mdl-navigation', app.pages.map((page) => {
+      return m('a.mdl-navigation__link',
+               {href: '#', onclick: ctrl.onClickDrawerItem.bind(ctrl, page)},
+               page.title());
+    })),
+    m('ul', externals.map((item, i) => {
+      return m('li', [
+        m('a#drawer-link-' + i, {href: item[1], target: '_blank'}, item[0]),
+        m('.mdl-tooltip', {'data-mdl-for': 'drawer-link-' + i}, item[1])
+      ]);
+    }))
   ]);
 };
 

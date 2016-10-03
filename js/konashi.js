@@ -378,6 +378,7 @@ class Konashi {
    *
    * @param {Number} pin Konashi.PIO[0-7]
    * @param {Number} mode Konashi.(KONASHI_PWM_ENABL|KONASHI_PWM_ENABLE_LED_MODE)
+   * @returns {Promise<Void>}
    */
   pwmMode(pin, mode) {
     console.log('pwmMode: ' + pin + ' ' + mode);
@@ -389,9 +390,9 @@ class Konashi {
     var that = this,
         data = new Uint8Array([this._state.pwmModes]);
     if (mode == Konashi.KONASHI_PWM_ENABLE_LED_MODE) {
-        return this.pwmPeriod(pin, Konashi.KONASHI_PWM_LED_PERIOD)
-          .then(() => that.pwmDuty(pin, 0))
-          .then(() => that._c12c.pwmConfig.writeValue(data));
+        return this._c12c.pwmConfig.writeValue(data)
+          .then(() => that.pwmPeriod(pin, Konashi.KONASHI_PWM_LED_PERIOD))
+          .then(() => that.pwmDuty(pin, 0));
     }
     return this._c12c.pwmConfig.writeValue(data);
   }
@@ -428,6 +429,12 @@ class Konashi {
                                (duty >> 0) & 0xff]);
     console.log('pwmDuty: ' + pin + ' ' + duty);
     return this._c12c.pwmDuty.writeValue(data);
+  }
+
+  pwmLedDrive(pin, ratio) {
+    ratio = Math.min(100.0, Math.max(0.0, ratio));
+    var duty = Konashi.KONASHI_PWM_LED_PERIOD * ratio / 100;
+    return this.pwmDuty(pin, duty);
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "konashi-web-bluetooth",
-  "description": "konashi for Web Bluetooth",
+  "description": "konashi SDK for Web Bluetooth",
   "main": ["js/konashi.js"],
   "moduleType": [
     "globals"
