@@ -550,7 +550,7 @@ class Konashi {
   }
 
   i2cStartCondition() {
-    return this._i2cSendCondition(Konashi.KONASHI_I2C_STOP_CONDITION);
+    return this._i2cSendCondition(Konashi.KONASHI_I2C_START_CONDITION);
   }
 
   i2cRestartCondition() {
