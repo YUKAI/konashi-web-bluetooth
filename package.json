@@ -1,0 +1,25 @@
+{
+  "name": "@ux-xu/konashi-web-bluetooth",
+  "version": "1.0.0",
+  "description": "konashi Web Bluetooth SDK",
+  "main": "konashi.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YUKAI/konashi-web-bluetooth.git"
+  },
+  "keywords": [
+    "konashi",
+    "web-bluetooth",
+    "javascript",
+    "bluetooth"
+  ],
+  "author": "Yusaku Nishiwaki",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/YUKAI/konashi-web-bluetooth/issues"
+  },
+  "homepage": "https://github.com/YUKAI/konashi-web-bluetooth#readme"
+}
