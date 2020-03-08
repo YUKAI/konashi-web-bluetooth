@@ -185,7 +185,7 @@ class konashi {
    * @returns {String}
    */
   static get _serviceUUID() {
-    return _createUUID("ff00");
+    return konashi._createUUID("ff00");
   }
 
   /**
@@ -502,13 +502,13 @@ class konashi {
    * @param {Number} duty Please specify the units as microseconds (us) in 32bits.
    */
   async pwmDuty(pin, duty) {
-    const duty = parseInt(duty);
+    const dutyNum = parseInt(duty);
     const data = new Uint8Array([
       pin,
-      (duty >> 24) & 0xff,
-      (duty >> 16) & 0xff,
-      (duty >> 8) & 0xff,
-      (duty >> 0) & 0xff
+      (dutyNum >> 24) & f,
+      (dutyNum >> 16) & f,
+      (dutyNum >> 8) & f,
+      (dutyNum >> 0) &ff
     ]);
     await this._c12c.pwmDuty.writeValue(data);
   }
