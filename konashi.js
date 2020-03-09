@@ -505,10 +505,10 @@ class konashi {
     const dutyNum = parseInt(duty);
     const data = new Uint8Array([
       pin,
-      (dutyNum >> 24) & f,
-      (dutyNum >> 16) & f,
-      (dutyNum >> 8) & f,
-      (dutyNum >> 0) &ff
+      (dutyNum >> 24) & 0xff,
+      (dutyNum >> 16) & 0xff,
+      (dutyNum >> 8) & 0xff,
+      (dutyNum >> 0) & 0xff
     ]);
     await this._c12c.pwmDuty.writeValue(data);
   }
@@ -516,13 +516,13 @@ class konashi {
   /**
    * Write PWM ratio for the LEDs on konashi board.
    * This function can be also use to control DC motors.
-   * 
+   *
    * @param {Number} pin konashi.PIO(0-7)
    * @param {Number} ratio (0 - 100)
    */
   async pwmWrite(pin, ratio) {
     const rate = Math.min(100.0, Math.max(0.0, ratio));
-    const duty = konashi.PWM_LED_PERIOD * rate / 100;
+    const duty = (konashi.PWM_LED_PERIOD * rate) / 100;
     await this.pwmDuty(pin, duty);
   }
 
