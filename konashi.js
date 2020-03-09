@@ -215,7 +215,14 @@ class konashi {
     const device = await navigator.bluetooth.requestDevice(options);
     const k = new konashi(device);
 
-    if (willAutoConnect) await k.connect();
+    if (willAutoConnect) {
+      await k.connect().catch(async e => {
+        const askRetrieve = /retrieve services/;
+        if (askRetrieve.test(e)) {
+          await k.connect();
+        }
+      });
+    }
 
     return k;
   }
@@ -264,17 +271,30 @@ class konashi {
    * Assign `_gatt` and `_service` properties to this when the connection has been made.
    */
   async connect() {
-    this._gatt = await this._device.gatt.connect().catch(e => console.error(e));
+    this._gatt = await this._device.gatt.connect().catch(error => {
+      console.log(error);
+      throw error;
+    });
     this._service = await this._gatt
       .getPrimaryService(konashi._serviceUUID)
-      .catch(e => console.error(e));
+      .catch(error => {
+        console.log(error);
+        throw error;
+      });
 
     for (const uuid in this._c12cUUIDs) {
       const c = await this._service
         .getCharacteristic(this._c12cUUIDs[uuid])
-        .catch(e => console.error(e));
+        .catch(error => {
+          console.log(error);
+          throw error;
+        });
       this._c12c[uuid] = c;
     }
+  }
+
+  disconnect() {
+    this._gatt.disconnect();
   }
 
   /**
@@ -305,13 +325,13 @@ class konashi {
    * Set konashi Digital I/O pin mode
    *
    * @param {Number} pin konashi.PIO(0-7)
-   * @param {Number} io konashi.(INPUT|OUTPUT)
+   * @param {Number} mode konashi.(INPUT|OUTPUT)
    */
-  async pinMode(pin, io) {
+  async pinMode(pin, mode) {
     const value = await this._c12c.pioSetting.readValue();
-    let modes = value.getUnit8(0);
+    let modes = value.getUint8(0);
 
-    if (io === konashi.OUTPUT) {
+    if (mode === konashi.OUTPUT) {
       modes |= 0x01 << pin;
     } else {
       modes &= ~(0x01 << pin) & 0xff;
@@ -339,9 +359,9 @@ class konashi {
    */
   async pinPullUp(pin, mode) {
     const value = await this._c12c.pioPullUp.readValue();
-    let modes = value.getUnit8(0);
+    let modes = value.getUint8(0);
 
-    if (io === konashi.PULLUP) {
+    if (mode === konashi.PULLUP) {
       modes |= 0x01 << pin;
     } else {
       modes &= ~(0x01 << pin) & 0xff;
@@ -364,7 +384,12 @@ class konashi {
     }
     // TODO: この write のエラーをハンドリングすることで、
     // 送信したかどうかの true, false が取れるのでは？
-    await this._c12c.pioOutput.writeValue(new Uint8Array([this._pioOutputs]));
+    await this._c12c.pioOutput
+      .writeValue(new Uint8Array([this._pioOutputs]))
+      .catch(error => {
+        console.log(error);
+        throw error;
+      });
   }
 
   /**
