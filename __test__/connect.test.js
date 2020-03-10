@@ -3,7 +3,7 @@ const { WebBluetoothMock, DeviceMock } = require("web-bluetooth-mock");
 
 let device;
 beforeEach(() => {
-  device = new DeviceMock("konashi3-020000", [0xff00]);
+  device = new DeviceMock("konashi3-020000");
   global.navigator = global.navigator || {};
   global.navigator.bluetooth = new WebBluetoothMock([device]);
 });
