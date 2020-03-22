@@ -1,4 +1,4 @@
-class konashi {
+class Konashi {
   /*
    * start konashi constants
    */
@@ -186,7 +186,7 @@ class konashi {
    * @returns {String}
    */
   static get _serviceUUID() {
-    return konashi._createUUID("ff00");
+    return Konashi._createUUID("ff00");
   }
 
   /**
@@ -201,7 +201,7 @@ class konashi {
           namePrefix: "konashi"
         }
       ],
-      optionalServices: [konashi._serviceUUID]
+      optionalServices: [Konashi._serviceUUID]
     };
   }
 
@@ -209,10 +209,10 @@ class konashi {
    * Find konashi device
    *
    * @param {Boolean} willAutoConnect default: true
-   * @param {Object} options default: konashi.defaultFilter
+   * @param {Object} options default: Konashi.defaultFilter
    * @returns {konashi}
    */
-  static async find(willAutoConnect = true, options = konashi.defaultFilter) {
+  static async find(willAutoConnect = true, options = Konashi.defaultFilter) {
     const device = await navigator.bluetooth.requestDevice(options);
     const k = new konashi(device);
 
@@ -240,29 +240,29 @@ class konashi {
 
   get _c12cUUIDs() {
     return {
-      pioSetting: konashi._createUUID("3000"),
-      pioPullUp: konashi._createUUID("3001"),
-      pioOutput: konashi._createUUID("3002"),
-      pioInputNotification: konashi._createUUID("3003"),
-      pwmConfig: konashi._createUUID("3004"),
-      pwmParameter: konashi._createUUID("3005"),
-      pwmDuty: konashi._createUUID("3006"),
-      analogDrive: konashi._createUUID("3007"),
-      analogInput: konashi._createUUID("3008"),
-      analogRead0: konashi._createUUID("3008"),
-      analogRead1: konashi._createUUID("3009"),
-      analogRead2: konashi._createUUID("300a"),
-      i2cConfig: konashi._createUUID("300b"),
-      i2cStartStop: konashi._createUUID("300c"),
-      i2cWrite: konashi._createUUID("300d"),
-      i2cReadParameter: konashi._createUUID("300e"),
-      i2cRead: konashi._createUUID("300f"),
-      uartConfig: konashi._createUUID("3010"),
-      uartBaudRate: konashi._createUUID("3011"),
-      uartTx: konashi._createUUID("3012"),
-      uartRxNotification: konashi._createUUID("3013"),
-      hardwareReset: konashi._createUUID("3014"),
-      hardwareLowBatteryNotification: konashi._createUUID("3015")
+      pioSetting: Konashi._createUUID("3000"),
+      pioPullUp: Konashi._createUUID("3001"),
+      pioOutput: Konashi._createUUID("3002"),
+      pioInputNotification: Konashi._createUUID("3003"),
+      pwmConfig: Konashi._createUUID("3004"),
+      pwmParameter: Konashi._createUUID("3005"),
+      pwmDuty: Konashi._createUUID("3006"),
+      analogDrive: Konashi._createUUID("3007"),
+      analogInput: Konashi._createUUID("3008"),
+      analogRead0: Konashi._createUUID("3008"),
+      analogRead1: Konashi._createUUID("3009"),
+      analogRead2: Konashi._createUUID("300a"),
+      i2cConfig: Konashi._createUUID("300b"),
+      i2cStartStop: Konashi._createUUID("300c"),
+      i2cWrite: Konashi._createUUID("300d"),
+      i2cReadParameter: Konashi._createUUID("300e"),
+      i2cRead: Konashi._createUUID("300f"),
+      uartConfig: Konashi._createUUID("3010"),
+      uartBaudRate: Konashi._createUUID("3011"),
+      uartTx: Konashi._createUUID("3012"),
+      uartRxNotification: Konashi._createUUID("3013"),
+      hardwareReset: Konashi._createUUID("3014"),
+      hardwareLowBatteryNotification: Konashi._createUUID("3015")
     };
   }
 
@@ -275,7 +275,7 @@ class konashi {
       .connect()
       .catch(e => this._throwError(e));
     this._service = await this._gatt
-      .getPrimaryService(konashi._serviceUUID)
+      .getPrimaryService(Konashi._serviceUUID)
       .catch(e => this._throwError(e));
 
     for (const uuid in this._c12cUUIDs) {
@@ -317,14 +317,14 @@ class konashi {
   /**
    * Set konashi Digital I/O pin mode
    *
-   * @param {Number} pin konashi.PIO(0-7)
-   * @param {Number} mode konashi.(INPUT|OUTPUT)
+   * @param {Number} pin Konashi.PIO(0-7)
+   * @param {Number} mode Konashi.(INPUT|OUTPUT)
    */
   async pinMode(pin, mode) {
     const value = await this._c12c.pioSetting.readValue().catch(e => this._throwError(e));
     let modes = value.getUint8(0);
 
-    if (mode === konashi.OUTPUT) {
+    if (mode === Konashi.OUTPUT) {
       modes |= 0x01 << pin;
     } else {
       modes &= ~(0x01 << pin) & 0xff;
@@ -349,8 +349,8 @@ class konashi {
   /**
    * Set konashi Digital I/O pin pullup mode
    *
-   * @param {Number} pin konashi.PIO(0-7)
-   * @param {Number} mode konashi.(PULLUP|NO_PULLS)
+   * @param {Number} pin Konashi.PIO(0-7)
+   * @param {Number} mode Konashi.(PULLUP|NO_PULLS)
    */
   async pinPullUp(pin, mode) {
     const value = await this._c12c.pioPullUp
@@ -358,7 +358,7 @@ class konashi {
       .catch(e => this._throwError(e));
     let modes = value.getUint8(0);
 
-    if (mode === konashi.PULLUP) {
+    if (mode === Konashi.PULLUP) {
       modes |= 0x01 << pin;
     } else {
       modes &= ~(0x01 << pin) & 0xff;
@@ -372,11 +372,11 @@ class konashi {
   /**
    * Set HIGH or LOW to a digital pin
    *
-   * @param {Number} pin konashi.PIO(0-7)
-   * @param {Number} value konashi.(HIGH|LOW)
+   * @param {Number} pin Konashi.PIO(0-7)
+   * @param {Number} value Konashi.(HIGH|LOW)
    */
   async digitalWrite(pin, value) {
-    if (value === konashi.HIGH) {
+    if (value === Konashi.HIGH) {
       this._pioOutputs |= 0x01 << pin;
     } else {
       this._pioOutputs &= ~(0x01 << pin) & 0xff;
@@ -402,8 +402,8 @@ class konashi {
   /**
    * Read a value of digital pin
    *
-   * @param {Number} pin konashi.PIO(0-7)
-   * @returns {Number} konashi.(LOW|HIGH)
+   * @param {Number} pin Konashi.PIO(0-7)
+   * @returns {Number} Konashi.(LOW|HIGH)
    */
   async digitalRead(pin) {
     const value = await this._c12c.pioInputNotification
@@ -455,20 +455,20 @@ class konashi {
   /**
    * Read a value of analog pin
    *
-   * @param {Number} pin konashi.AIO(0-2)
-   * @returns {Number} recommended: value / konashi.ANALOG_REFERENCE * 1000
+   * @param {Number} pin Konashi.AIO(0-2)
+   * @returns {Number} recommended: value / Konashi.ANALOG_REFERENCE * 1000
    */
   async analogRead(pin) {
     let characteristic;
 
     switch (pin) {
-      case konashi.AIO0:
+      case Konashi.AIO0:
         characteristic = this._c12c.analogRead0;
         break;
-      case konashi.AIO1:
+      case Konashi.AIO1:
         characteristic = this._c12c.analogRead1;
         break;
-      case konashi.AIO2:
+      case Konashi.AIO2:
         characteristic = this._c12c.analogRead2;
         break;
       default:
@@ -488,8 +488,8 @@ class konashi {
   /**
    * Set PWM mode to Digital I/O pin.
    *
-   * @param {Number} pin konashi.PIO(0-7)
-   * @param {Number} mode konashi.(PWM_ENABLE|PWM_ENABLE_LED_MODE|PWM_DISABLE)
+   * @param {Number} pin Konashi.PIO(0-7)
+   * @param {Number} mode Konashi.(PWM_ENABLE|PWM_ENABLE_LED_MODE|PWM_DISABLE)
    */
   async pwmMode(pin, mode) {
     const value = await this._c12c.pwmConfig
@@ -498,17 +498,17 @@ class konashi {
 
     let modes = value.getUint8(0);
 
-    if (mode === konashi.PWM_ENABLE || mode === konashi.PWM_ENABLE_LED_MODE) {
+    if (mode === Konashi.PWM_ENABLE || mode === Konashi.PWM_ENABLE_LED_MODE) {
       modes |= 0x01 << pin;
     } else {
       modes &= ~(0x01 << pin) & 0xff;
     }
 
-    if (mode === konashi.PWM_ENABLE_LED_MODE) {
+    if (mode === Konashi.PWM_ENABLE_LED_MODE) {
       await this._c12c.pwmConfig
         .writeValue(new Uint8Array([modes]))
         .catch(e => this._throwError(e));
-      await this.pwmPeriod(pin, konashi.PWM_LED_PERIOD).catch(e =>
+      await this.pwmPeriod(pin, Konashi.PWM_LED_PERIOD).catch(e =>
         this._throwError(e)
       );
       await this.pwmDuty(pin, 0).catch(e => this._throwError(e));
@@ -522,7 +522,7 @@ class konashi {
   /**
    * Set pwm period to Digital I/O pin.
    *
-   * @param {Number} pin konashi.PIO(0-7)
+   * @param {Number} pin Konashi.PIO(0-7)
    * @param {Number} period Please specify the value in 32bits.
    */
   async pwmPeriod(pin, period) {
@@ -540,7 +540,7 @@ class konashi {
   /**
    * Set pwm duty to Digital I/O pin.
    *
-   * @param {Number} pin konashi.PIO(0-7)
+   * @param {Number} pin Konashi.PIO(0-7)
    * @param {Number} duty Please specify the units as microseconds (us) in 32bits.
    */
   async pwmDuty(pin, duty) {
@@ -559,12 +559,12 @@ class konashi {
    * Write PWM ratio for the LEDs on konashi board.
    * This function can be also use to control DC motors.
    *
-   * @param {Number} pin konashi.PIO(0-7)
+   * @param {Number} pin Konashi.PIO(0-7)
    * @param {Number} ratio (0 - 100)
    */
   async pwmWrite(pin, ratio) {
     const rate = Math.min(100.0, Math.max(0.0, ratio));
-    const duty = (konashi.PWM_LED_PERIOD * rate) / 100;
+    const duty = (Konashi.PWM_LED_PERIOD * rate) / 100;
     await this.pwmDuty(pin, duty).catch(e => this._throwError(e));
   }
   // close PWM }
@@ -573,10 +573,10 @@ class konashi {
   /**
    * Set UART mode
    *
-   * @param {Number} mode konashi.UART_(DISABLE|ENABLE)
+   * @param {Number} mode Konashi.UART_(DISABLE|ENABLE)
    */
   async uartMode(mode) {
-    if (mode != konashi.UART_DISABLE && mode != konashi.UART_ENABLE) {
+    if (mode != Konashi.UART_DISABLE && mode != Konashi.UART_ENABLE) {
       throw new Error("Invalid UART modes.");
     }
     await this._c12c.uartConfig
@@ -587,10 +587,10 @@ class konashi {
   /**
    * Set the baud rate of UART
    *
-   * @param {Number} rate konashi.UART_RATE_(2K4|9K6)
+   * @param {Number} rate Konashi.UART_RATE_(2K4|9K6)
    */
   async uartBaudRate(rate) {
-    if (rate != konashi.UART_RATE_2K4 && rate != konashi.UART_RATE_9K6) {
+    if (rate != Konashi.UART_RATE_2K4 && rate != Konashi.UART_RATE_9K6) {
       throw new Error("Invalid UART baud rate.");
     }
     const data = new Uint8Array([(rate >> 8) & 0xff, rate & 0xff]);
@@ -642,10 +642,10 @@ class konashi {
    * @param {Uint8Array} data
    */
   async _uartWrite(data) {
-    if (konashi.UART_DATA_MAX_LENGTH < data.length) {
+    if (Konashi.UART_DATA_MAX_LENGTH < data.length) {
       throw new Error(
         "The data size has to be less then " +
-          konashi.UART_DATA_MAX_LENGTH +
+          Konashi.UART_DATA_MAX_LENGTH +
           "."
       );
     }
@@ -664,14 +664,14 @@ class konashi {
   /**
    * Set I2C mode
    *
-   * @param {Number} mode konashi.I2C_(DISABLE|ENABLE|ENABLE_100K|ENABLE_400K)
+   * @param {Number} mode Konashi.I2C_(DISABLE|ENABLE|ENABLE_100K|ENABLE_400K)
    */
   async i2cMode(mode) {
     if (
-      mode != konashi.I2C_DISABLE &&
-      mode != konashi.I2C_ENABLE &&
-      mode != konashi.I2C_ENABLE_100K &&
-      mode != konashi.I2C_ENABLE_400K
+      mode != Konashi.I2C_DISABLE &&
+      mode != Konashi.I2C_ENABLE &&
+      mode != Konashi.I2C_ENABLE_100K &&
+      mode != Konashi.I2C_ENABLE_400K
     ) {
       throw new Error("Invalid I2C mode");
     }
@@ -679,27 +679,27 @@ class konashi {
   }
 
   async i2cStopCondition() {
-    await this._i2cSendCondition(konashi.I2C_STOP_CONDITION);
+    await this._i2cSendCondition(Konashi.I2C_STOP_CONDITION);
   }
 
   async i2cStartCondition() {
-    await this._i2cSendCondition(konashi.I2C_START_CONDITION);
+    await this._i2cSendCondition(Konashi.I2C_START_CONDITION);
   }
 
   async i2cRestartCondition() {
-    await this._i2cSendCondition(konashi.I2C_RESTART_CONDITION);
+    await this._i2cSendCondition(Konashi.I2C_RESTART_CONDITION);
   }
 
   /**
    * Write I2C condition.
    *
-   * @param {Number} condition konashi.I2C_(STOP|START|RESTART)_CONDITION
+   * @param {Number} condition Konashi.I2C_(STOP|START|RESTART)_CONDITION
    */
   async _i2cSendCondition(condition) {
     if (
-      condition != konashi.I2C_STOP_CONDITION &&
-      condition != konashi.I2C_START_CONDITION &&
-      condition != konashi.I2C_RESTART_CONDITION
+      condition != Konashi.I2C_STOP_CONDITION &&
+      condition != Konashi.I2C_START_CONDITION &&
+      condition != Konashi.I2C_RESTART_CONDITION
     ) {
       throw new Error("Invalid I2C condition.");
     }
@@ -713,7 +713,7 @@ class konashi {
    * @param {Uint8Array} data
    */
   async i2cWrite(address, data) {
-    const chunkSize = konashi.I2C_DATA_MAX_LENGTH;
+    const chunkSize = Konashi.I2C_DATA_MAX_LENGTH;
     if (data.length <= chunkSize) {
       await this._i2cWrite(address, data);
     }
@@ -753,13 +753,13 @@ class konashi {
    * @param {Uint8Array} data
    */
   async _i2cWrite(address, data) {
-    if (konashi.I2C_DATA_MAX_LENGTH < data.length) {
+    if (Konashi.I2C_DATA_MAX_LENGTH < data.length) {
       throw new Error(
-        "The data size has to be less than " + konashi.I2C_DATA_MAX_LENGTH + "."
+        "The data size has to be less than " + Konashi.I2C_DATA_MAX_LENGTH + "."
       );
     }
 
-    const writeData = new Uint8Array(konashi.I2C_DATA_MAX_LENGTH + 2);
+    const writeData = new Uint8Array(Konashi.I2C_DATA_MAX_LENGTH + 2);
     writeData[0] = data.length + 1;
     writeData[1] = (address << 1) & 0b11111110; // Write Flag
 
@@ -793,9 +793,9 @@ class konashi {
    * @param {Number} length
    */
   async _i2cReadRequest(address, length) {
-    if (konashi.I2C_DATA_MAX_LENGTH < length) {
+    if (Konashi.I2C_DATA_MAX_LENGTH < length) {
       throw new Error(
-        "The data size has to be less than " + konashi.I2C_DATA_MAX_LENGTH + "."
+        "The data size has to be less than " + Konashi.I2C_DATA_MAX_LENGTH + "."
       );
     }
 
