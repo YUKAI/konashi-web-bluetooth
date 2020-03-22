@@ -1,4 +1,4 @@
-const konashi = require("../konashi");
+const Konashi = require("../konashi");
 const { WebBluetoothMock, DeviceMock } = require("web-bluetooth-mock");
 
 let device;
@@ -11,7 +11,7 @@ beforeEach(() => {
 // URL: https://github.com/urish/web-bluetooth-mock
 test("find device", async () => {
   jest.spyOn(global.navigator.bluetooth, "requestDevice");
-  await konashi.find((willAutoConnect = false));
+  await Konashi.find((willAutoConnect = false));
   expect(global.navigator.bluetooth.requestDevice).toHaveBeenCalled();
 });
 
@@ -23,22 +23,22 @@ test("find other device", async () => {
         namePrefix: "cocorokit"
       }
     ],
-    optionalServices: [konashi._serviceUUID]
+    optionalServices: [Konashi._serviceUUID]
   };
 
-  await expect(konashi.find(true, customFilter)).rejects.toThrow(
+  await expect(Konashi.find(true, customFilter)).rejects.toThrow(
     "User cancelled device chooser"
   );
 });
 
 test("connect to device", async () => {
   jest.spyOn(device.gatt, "connect");
-  await konashi.find((willAutoConnect = true));
+  await Konashi.find((willAutoConnect = true));
   expect(device.gatt.connect).toHaveBeenCalled();
 });
 
 test("not connect to device", async () => {
   jest.spyOn(device.gatt, "connect");
-  await konashi.find((willAutoConnect = false));
+  await Konashi.find((willAutoConnect = false));
   expect(device.gatt.connect).not.toHaveBeenCalled();
 });

@@ -210,11 +210,11 @@ class Konashi {
    *
    * @param {Boolean} willAutoConnect default: true
    * @param {Object} options default: Konashi.defaultFilter
-   * @returns {konashi}
+   * @returns {Konashi}
    */
   static async find(willAutoConnect = true, options = Konashi.defaultFilter) {
     const device = await navigator.bluetooth.requestDevice(options);
-    const k = new konashi(device);
+    const k = new Konashi(device);
 
     if (willAutoConnect) {
       await k.connect().catch(async error => {
@@ -862,5 +862,5 @@ class Konashi {
   // close utility functions }
 }
 
-module.exports = konashi;
-module.exports.default = konashi;
+module.exports = Konashi;
+module.exports.default = Konashi;

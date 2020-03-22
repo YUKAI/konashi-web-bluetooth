@@ -1,4 +1,4 @@
-const konashi = require("../konashi");
+const Konashi = require("../konashi");
 const { WebBluetoothMock, DeviceMock } = require("web-bluetooth-mock");
 
 let device;
@@ -19,10 +19,10 @@ test("Change digital pin mode", async () => {
   controlCharacteristic.writeValue = jest.fn();
   controlCharacteristic.value = new DataView(new Uint8Array([0]).buffer);
 
-  const k = await konashi.find();
+  const k = await Konashi.find();
   let errorMsg = "";
   await k
-    .pinMode(konashi.PIO0, konashi.OUTPUT)
+    .pinMode(Konashi.PIO0, Konashi.OUTPUT)
     .catch(e => (errorMsg = e.message));
 
   // web-bluetooth-mock does not impliment "GATT operation already in progress."
@@ -44,7 +44,7 @@ test("Change all digital pin mode", async () => {
   controlCharacteristic.writeValue = jest.fn();
   controlCharacteristic.value = new DataView(new Uint8Array([0]).buffer);
 
-  const k = await konashi.find();
+  const k = await Konashi.find();
   let errorMsg = "";
   await k.pinModeAll(0b01010101).catch(e => (errorMsg = e.message));
 
@@ -68,10 +68,10 @@ test("Change digital pin pullup", async () => {
   controlCharacteristic.writeValue = jest.fn();
   controlCharacteristic.value = new DataView(new Uint8Array([0]).buffer);
 
-  const k = await konashi.find();
+  const k = await Konashi.find();
   let errorMsg = "";
   await k
-    .pinPullUp(konashi.PIO1, konashi.PULLUP)
+    .pinPullUp(Konashi.PIO1, Konashi.PULLUP)
     .catch(e => (errorMsg = e.message));
 
   expect(errorMsg).toEqual("Cannot read property 'catch' of undefined");
@@ -91,31 +91,31 @@ test("Write single digital pin value", async () => {
   controlCharacteristic.writeValue = jest.fn();
   controlCharacteristic.value = new DataView(new Uint8Array([0]).buffer);
 
-  const k = await konashi.find();
+  const k = await Konashi.find();
   let errorMsg = "";
   await k
-    .digitalWrite(konashi.PIO3, konashi.HIGH)
+    .digitalWrite(Konashi.PIO3, Konashi.HIGH)
     .catch(e => (errorMsg = e.message));
 
   expect(errorMsg).toEqual("Cannot read property 'catch' of undefined");
   expect(controlCharacteristic.writeValue).toHaveBeenCalledWith(
-    new Uint8Array([0b00001000]) // konashi.PIO3
+    new Uint8Array([0b00001000]) // Konashi.PIO3
   );
   expect(controlCharacteristic.writeValue).not.toHaveBeenCalledWith(
-    new Uint8Array([0b00000100]) // not konashi.PIO2
+    new Uint8Array([0b00000100]) // not Konashi.PIO2
   );
 
   // initial state: PIO3(HIGH)
   controlCharacteristic.value = new DataView(
     new Uint8Array([0b00001000]).buffer
   );
-  k.digitalWrite(konashi.PIO4, konashi.HIGH).catch(e => (errorMsg = e.message));
+  k.digitalWrite(Konashi.PIO4, Konashi.HIGH).catch(e => (errorMsg = e.message));
   expect(errorMsg).toEqual("Cannot read property 'catch' of undefined");
   expect(controlCharacteristic.writeValue).toHaveBeenCalledWith(
-    new Uint8Array([0b00011000]) // konashi.PIO3
+    new Uint8Array([0b00011000]) // Konashi.PIO3
   );
   expect(controlCharacteristic.writeValue).not.toHaveBeenCalledWith(
-    new Uint8Array([0b00010000]) // not konashi.PIO2
+    new Uint8Array([0b00010000]) // not Konashi.PIO2
   );
 });
 
@@ -130,7 +130,7 @@ test("Write digital pins value at all", async () => {
   controlCharacteristic.writeValue = jest.fn();
   controlCharacteristic.value = new DataView(new Uint8Array([0]).buffer);
 
-  const k = await konashi.find();
+  const k = await Konashi.find();
   let errorMsg = "";
   await k
     .digitalWriteAll(0x1F)
@@ -149,10 +149,10 @@ test("Write digital pins value at all", async () => {
   k.digitalWriteAll(0b00010100).catch(e => (errorMsg = e.message));
   expect(errorMsg).toEqual("Cannot read property 'catch' of undefined");
   expect(controlCharacteristic.writeValue).toHaveBeenCalledWith(
-    new Uint8Array([0b00010100]) // not konashi.PIO2
+    new Uint8Array([0b00010100]) // not Konashi.PIO2
   );
   expect(controlCharacteristic.writeValue).not.toHaveBeenCalledWith(
-    new Uint8Array([0b00010101]) // konashi.PIO3
+    new Uint8Array([0b00010101]) // Konashi.PIO3
   );
 });
 
@@ -169,14 +169,14 @@ test("Read a value from single pin", async () => {
 
   // readValue have been called.
   jest.spyOn(controlCharacteristic, "readValue");
-  const k = await konashi.find();
-  const value = await k.digitalRead(konashi.PIO2);
+  const k = await Konashi.find();
+  const value = await k.digitalRead(Konashi.PIO2);
   expect(controlCharacteristic.readValue).toHaveBeenCalled();
 
   // readValue was same as setting.
   controlCharacteristic.value = new DataView(new Uint8Array([0b00001000]).buffer);
-  const value0 = await k.digitalRead(konashi.PIO0);
-  const value3 = await k.digitalRead(konashi.PIO3);
+  const value0 = await k.digitalRead(Konashi.PIO0);
+  const value3 = await k.digitalRead(Konashi.PIO3);
 
   expect(value0).toEqual(0);
   expect(value3).toEqual(1);
@@ -199,7 +199,7 @@ test("Input Notification", async() => {
 
   // startNotification have been called
   jest.spyOn(controlCharacteristic, "startNotifications");
-  const k = await konashi.find();
+  const k = await Konashi.find();
   await k.startDigitalInputNotification(receivedFunction);
   expect(controlCharacteristic.startNotifications).toHaveBeenCalled();
 
