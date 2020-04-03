@@ -534,7 +534,7 @@ class Konashi {
       (period >> 0) & 0xff
     ]);
 
-    await this._c12c.pwmPeriod.writeValue(data).catch(e => this._throwError(e));
+    await this._c12c.pwmParameter.writeValue(data).catch(e => this._throwError(e));
   }
 
   /**
