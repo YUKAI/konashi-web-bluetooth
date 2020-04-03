@@ -1,10 +1,12 @@
 {
   "name": "@ux-xu/konashi-web-bluetooth",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "konashi Web Bluetooth SDK",
   "main": "konashi.js",
+  "types": "konashi.d.ts",
   "files": [
     "konashi.js",
+    "konashi.d.ts",
     "LICENSE.txt",
     "README.md"
   ],
