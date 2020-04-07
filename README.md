@@ -1,14 +1,13 @@
 # konashi 3.0 SDK for Web Bluetooth
 
-konashi 3.0 を Web Bluetooth で操作することができます。  
+konashi 3.0 を Web Bluetooth で操作することができます。
 
 開発言語は以下のものに対応しております。
 
 - JavaScript(ES2015, async await)
-- TypeScript
+- typescript
 
 konashi 公式ドキュメント：https://konashi.ux-xu.com/
-
 
 ```js
 import { Konashi } from "@ux-xu/konashi-web-bluetooth";
@@ -17,7 +16,7 @@ window.addEventListener("click", async () => {
   const k = await Konashi.find();
   await k
     .pinMode(Konashi.PIO0, Konashi.OUTPUT)
-    .catch(error => console.log(error));
+    .catch((error) => console.log(error));
   let i = 0;
   setInterval(async () => {
     k.digitalWrite(Konashi.PIO0, i % 2 === 0 ? Konashi.HIGH : Konashi.LOW);
@@ -27,7 +26,7 @@ window.addEventListener("click", async () => {
 
 ## 動作環境
 
-Web Bluetooth API 公式 Github の Implementation Status をご確認ください。  
+Web Bluetooth API 公式 Github の Implementation Status をご確認ください。
 
 https://github.com/WebBluetoothCG/web-bluetooth/blob/master/implementation-status.md
 
@@ -50,7 +49,7 @@ https://apps.apple.com/jp/app/webble/id1193531073
 
 現在対応している機能は以下の通りです。
 
-- Digital I/O 
+- Digital I/O
 - Digital Input Notification
 - Analog Input
 - PWM
@@ -64,13 +63,13 @@ https://apps.apple.com/jp/app/webble/id1193531073
 
 ## 関数について
 
-TypeScript の定義を利用して説明します。
+typescript の定義を利用して説明します。
 
 ### 定数
 
 `Konashi.HIGH` で呼びだせる定数です。
 
-```TypeScript
+```typescript
 static get HIGH(): number;  // Digital HIGH
 static get LOW(): number;  // Digital LOW
 static get OUTPUT(): number;  // mode: Digital Pin OUTPUT
@@ -126,29 +125,54 @@ static get defaultFilter(): object;
 ### クラス関数
 
 konashi のインスタンスを作成するために利用する関数群
-使い方は更新していきます。
 
-```TypeScript
+```typescript
 static _createUUID(part: string): string;
 static find(willAutoConnect: boolean, options: Object): Promise<Konashi>;
 ```
 
-```TypeScript
-constructor(device: BluetoothDevice);
+以下のサンプルは，
+
+①konashiを見つけて自動的に接続する
+②cocorokitを見つけて接続する
+
+```js
+const konashi = await Konashi.findk();
+const konashi = await Konashi.find({
+  filters: [{ namePrefix: "cocorokit" }],
+  optionalServices: [Konashi._serviceUUID],
+});
 ```
 
 ### インスタンス関数
 
-使い方は更新していきます。
+`find` 関数に `willAutoConnect = false` を設定した場合，別途接続する必要があります．
 
-```TypeScript
+```typescript
 connect(): void;
 disconnect(): void;
+```
 
+以下，見つけて接続するサンプルです．
+
+```js
+const konashi = await Konashi.find(willAutoConnect = false);
+await konashi.connect().catch(async error => {
+  whatyouwant();
+});
+```
+
+#### 接続したkonashiの情報を取得する関数
+
+```typescript
 get _c12cUUIDs(): { [key: string]: string };
 get isConnected(): boolean;
 get deviceName(): string;
+```
 
+#### デジタルピンの入出力
+
+```typescript
 // start Digital I/O {
 pinMode(pin: number, mode: number): Promise<void>;
 pinModeAll(modes: number): Promise<void>;
@@ -159,24 +183,73 @@ digitalRead(pin: number): Promise<number>;
 startDigitalInputNotification(callback: (arg0: number) => void): Promise<void>;
 stopDigitalInputNotification(): Promise<void>;
 // close Digital I/O }
+```
 
+```js
+const konashi = await Konashi.find();
+
+async () => {
+  await konashi.pinMode(Konashi.PIO0, Konashi.OUTPUT);
+  await konashi.digitalWrite(Konashi.PIO0, Konashi.HIGH);
+}
+
+async () => {
+  await konashi.pinModeAll(0b11111111);
+  await konashi.digitalWriteAll(0b11111111);
+}
+
+async () => {
+  await konashi.pinMode(Konashi.PIO0, Konashi.INPUT)
+  const p0_input = await konashi.digitalRead(Konashi.PIO0);
+}
+
+const printValue = (value) => {
+  console.log("received: " + value);
+}
+
+konashi.startDigitalInputNotification(printValue);
+
+// if input pin 1 value changed to HIGH
+// received: 0b00000010
+
+konashi.startDigitalInputNotification(printValue);
+```
+
+#### アナログピンの入力
+
+```typescript
 // start Analog Input {
 analogRead(pin: number): Promise<number>;
 // close Analog Input }
+```
 
+```js
+const konashi = await Konashi.find();
+const analog0_value = konashi.analogRead(Konashi.AIO0);
+```
+
+#### PWM の操作
+
+```typescript
 // start PWM {
 pwmMode(pin: number, mode: number): Promise<void>;
 pwmPeriod(pin: number, period: number): Promise<void>;
 pwmDuty(pin: number, duty: number): Promise<void>;
 pwmWrite(pin: number, ratio: number): Promise<void>;
 // close PWM }
+```
 
+```js
+const konashi = await Konashi.find();
+konashi.pwmMode(Konashi.PIO1, Konashi.PWM_ENABLE_LED_MODE);
+konashi.pwmWrite(Konashi.PIO1, 100);
+```
+#### その他デバイスの操作
+
+```typescript
 // start Hardware control {
 reset(): Promise<void>;
 readBatteryLevel(): Promise<number>;
 readSignalStrength(): Promise<number>;
 // close Hardware control }
 ```
-
-
-
